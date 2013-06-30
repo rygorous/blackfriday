@@ -37,6 +37,7 @@ const (
 	EXTENSION_SPACE_HEADERS                 // be strict about prefix header rules
 	EXTENSION_HARD_LINE_BREAK               // translate newlines into line breaks
 	EXTENSION_TAB_SIZE_EIGHT                // expand tabs to eight spaces instead of four
+	EXTENSION_MATH                          // $$..$$ (inline) and $$[..$$] (display) math blocks.
 )
 
 // These are the possible flag values for the link renderer.
@@ -151,6 +152,8 @@ type Renderer interface {
 	RawHtmlTag(out *bytes.Buffer, tag []byte)
 	TripleEmphasis(out *bytes.Buffer, text []byte)
 	StrikeThrough(out *bytes.Buffer, text []byte)
+	DisplayMath(out *bytes.Buffer, text []byte)
+	InlineMath(out *bytes.Buffer, text []byte)
 
 	// Low-level callbacks
 	Entity(out *bytes.Buffer, entity []byte)
@@ -268,6 +271,10 @@ func Markdown(input []byte, renderer Renderer, extensions int) []byte {
 	p.inlineCallback['<'] = leftAngle
 	p.inlineCallback['\\'] = escape
 	p.inlineCallback['&'] = entity
+
+	if extensions&EXTENSION_MATH != 0 {
+		p.inlineCallback['$'] = math
+	}
 
 	if extensions&EXTENSION_AUTOLINK != 0 {
 		p.inlineCallback[':'] = autoLink

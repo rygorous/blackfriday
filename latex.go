@@ -229,6 +229,18 @@ func (options *Latex) StrikeThrough(out *bytes.Buffer, text []byte) {
 	out.WriteString("}")
 }
 
+func (options *Latex) DisplayMath(out *bytes.Buffer, text []byte) {
+	out.WriteString("\\[")
+	out.Write(text)
+	out.WriteString("\\]")
+}
+
+func (options *Latex) InlineMath(out *bytes.Buffer, text []byte) {
+	out.WriteString("$")
+	out.Write(text)
+	out.WriteString("$")
+}
+
 func needsBackslash(c byte) bool {
 	for _, r := range []byte("_{}%$&\\~") {
 		if c == r {

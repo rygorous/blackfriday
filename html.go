@@ -501,6 +501,15 @@ func (options *Html) StrikeThrough(out *bytes.Buffer, text []byte) {
 	out.WriteString("</del>")
 }
 
+// Default math renderes don't do anything in HTML.
+func (options *Html) DisplayMath(out *bytes.Buffer, text []byte) {
+	attrEscape(out, text)
+}
+
+func (options *Html) InlineMath(out *bytes.Buffer, text []byte) {
+	attrEscape(out, text)
+}
+
 func (options *Html) Entity(out *bytes.Buffer, entity []byte) {
 	out.Write(entity)
 }

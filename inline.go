@@ -459,7 +459,7 @@ func leftAngle(p *parser, out *bytes.Buffer, data []byte, offset int) int {
 }
 
 // '\\' backslash escape
-var escapeChars = []byte("\\`*_{}[]()#+-.!:|&<>")
+var escapeChars = []byte("\\`*_{}[]()#+-.!:|&<>$")
 
 func escape(p *parser, out *bytes.Buffer, data []byte, offset int) int {
 	data = data[offset:]
@@ -520,6 +520,44 @@ func entity(p *parser, out *bytes.Buffer, data []byte, offset int) int {
 	p.r.Entity(out, data[:end])
 
 	return end
+}
+
+// $$ ... $$ - inline math.
+// $$[ ... $$] - display math.
+func math(p *parser, out *bytes.Buffer, data []byte, offset int) int {
+	// quick check if we have a $$ - otheriwse, bail
+	if len(data) < offset+2 || data[offset+1] != '$' {
+		return 0
+	}
+
+	data = data[offset:]
+
+	// are we display math or not?
+	display := false
+	begin := 2
+	endMarker := []byte("$$")
+	if len(data) > 2 && data[2] == '[' {
+		begin = 3
+		endMarker = []byte("$$]")
+		display = true
+	}
+
+	end := bytes.Index(data[begin:], endMarker)
+	if end < 0 {
+		return 0
+	}
+	end += begin
+
+	// render the math
+	if begin != end {
+		if display {
+			p.r.DisplayMath(out, data[begin:end])
+		} else {
+			p.r.InlineMath(out, data[begin:end])
+		}
+	}
+
+	return end + len(endMarker)
 }
 
 func autoLink(p *parser, out *bytes.Buffer, data []byte, offset int) int {
