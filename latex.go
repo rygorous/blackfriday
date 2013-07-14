@@ -241,6 +241,9 @@ func (options *Latex) InlineMath(out *bytes.Buffer, text []byte) {
 	out.WriteString("$")
 }
 
+func (options *Latex) LiquidTag(out *bytes.Buffer, tag []byte, content []byte) {
+}
+
 func needsBackslash(c byte) bool {
 	for _, r := range []byte("_{}%$&\\~") {
 		if c == r {

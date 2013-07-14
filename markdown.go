@@ -38,6 +38,7 @@ const (
 	EXTENSION_HARD_LINE_BREAK               // translate newlines into line breaks
 	EXTENSION_TAB_SIZE_EIGHT                // expand tabs to eight spaces instead of four
 	EXTENSION_MATH                          // $$..$$ (inline) and $$[..$$] (display) math blocks.
+	EXTENSION_LIQUIDTAG                     // liquid-style {% .. %} tag blocks.
 )
 
 // These are the possible flag values for the link renderer.
@@ -154,6 +155,7 @@ type Renderer interface {
 	StrikeThrough(out *bytes.Buffer, text []byte)
 	DisplayMath(out *bytes.Buffer, text []byte)
 	InlineMath(out *bytes.Buffer, text []byte)
+	LiquidTag(out *bytes.Buffer, tag []byte, content []byte)
 
 	// Low-level callbacks
 	Entity(out *bytes.Buffer, entity []byte)
@@ -278,6 +280,10 @@ func Markdown(input []byte, renderer Renderer, extensions int) []byte {
 
 	if extensions&EXTENSION_AUTOLINK != 0 {
 		p.inlineCallback[':'] = autoLink
+	}
+
+	if extensions&EXTENSION_LIQUIDTAG != 0 {
+		p.inlineCallback['{'] = liquidtag
 	}
 
 	first := firstPass(p, input)
@@ -526,6 +532,11 @@ func isspace(c byte) bool {
 // TODO: check when this is looking for ASCII alnum and when it should use unicode
 func isalnum(c byte) bool {
 	return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+}
+
+// Test if a character is a "word character" (Perl \w)
+func iswordchar(c byte) bool {
+	return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'
 }
 
 // Replace tab characters with spaces, aligning to the next TAB_SIZE column.

@@ -19,18 +19,21 @@ func (n *Null) BlockHtml(out *bytes.Buffer, text []byte) {
 }
 
 func (n *Null) Header(out *bytes.Buffer, text func() bool, level int) {
+	text()
 }
 
 func (n *Null) HRule(out *bytes.Buffer) {
 }
 
 func (n *Null) List(out *bytes.Buffer, text func() bool, flags int) {
+	text()
 }
 
 func (n *Null) ListItem(out *bytes.Buffer, text []byte, flags int) {
 }
 
 func (n *Null) Paragraph(out *bytes.Buffer, text func() bool) {
+	text()
 }
 
 func (n *Null) Table(out *bytes.Buffer, header []byte, body []byte, columnData []int) {

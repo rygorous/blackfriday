@@ -560,6 +560,56 @@ func math(p *parser, out *bytes.Buffer, data []byte, offset int) int {
 	return end + len(endMarker)
 }
 
+// "{%" .. "%}" - liquid-style tag
+var liquidEndMarker = []byte("%}")
+
+func liquidtag(p *parser, out *bytes.Buffer, data []byte, offset int) int {
+	// check for full start tag
+	if len(data) < offset+2 || data[offset+1] != '%' {
+		return 0
+	}
+
+	data = data[offset:]
+
+	// find end of tag
+	begin := 3
+	end := bytes.Index(data[begin:], liquidEndMarker)
+	if end < 0 {
+		return 0
+	}
+	end += begin
+
+	// try to determine name of tag
+	tagbegin := begin
+	for isspace(data[tagbegin]) {
+		tagbegin++
+		if tagbegin >= end {
+			return 0
+		}
+	}
+	tagend := tagbegin
+	for tagend < end && iswordchar(data[tagend]) {
+		tagend++
+	}
+	if tagend == tagbegin {
+		return 0
+	}
+	if tagbegin == tagend {
+		return 0
+	}
+
+	// we have the tag, just determine the content boundary now
+	contentbegin := tagend
+	for contentbegin < end && isspace(data[contentbegin]) {
+		contentbegin++
+	}
+
+	// render
+	p.r.LiquidTag(out, data[tagbegin:tagend], data[contentbegin:end])
+
+	return end + len(liquidEndMarker)
+}
+
 func autoLink(p *parser, out *bytes.Buffer, data []byte, offset int) int {
 	// quick check to rule out most false hits on ':'
 	if p.insideLink || len(data) < offset+3 || data[offset+1] != '/' || data[offset+2] != '/' {

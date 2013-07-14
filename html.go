@@ -221,7 +221,7 @@ func (options *Html) BlockCodeNormal(out *bytes.Buffer, text []byte, lang string
 			continue
 		}
 		if count == 0 {
-			out.WriteString("<pre><code class=\"")
+			out.WriteString("<pre><code class=\"language-")
 		} else {
 			out.WriteByte(' ')
 		}
@@ -508,6 +508,9 @@ func (options *Html) DisplayMath(out *bytes.Buffer, text []byte) {
 
 func (options *Html) InlineMath(out *bytes.Buffer, text []byte) {
 	attrEscape(out, text)
+}
+
+func (options *Html) LiquidTag(out *bytes.Buffer, tag []byte, content []byte) {
 }
 
 func (options *Html) Entity(out *bytes.Buffer, entity []byte) {
