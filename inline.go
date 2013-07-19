@@ -525,7 +525,7 @@ func entity(p *parser, out *bytes.Buffer, data []byte, offset int) int {
 // $$ ... $$ - inline math.
 // $$[ ... $$] - display math.
 func math(p *parser, out *bytes.Buffer, data []byte, offset int) int {
-	// quick check if we have a $$ - otheriwse, bail
+	// quick check if we have a $$ - otherwise, bail
 	if len(data) < offset+2 || data[offset+1] != '$' {
 		return 0
 	}
